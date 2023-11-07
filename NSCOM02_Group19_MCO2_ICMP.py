@@ -5,9 +5,7 @@ import struct
 import time
 import select
 import binascii
-
 import errno
-import threading
 
 ICMP_ECHO_REQUEST = 8
 
@@ -46,7 +44,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 
         #Fetch the ICMP header from the IP packet
 
-        icmp_header =
+        #icmp_header =
 
         #Fill in end
 
@@ -87,10 +85,10 @@ def doOnePing(destAddr, timeout):
     #Fill in start
     #create socket
     try:
-        mySocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
+        mySocket = socket(AF_INET, SOCK_RAW, icmp)
     except PermissionError:
         if PermissionError.errno == errno.EPERM:
-           mySocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, icmp)
+           mySocket = socket(AF_INET, SOCK_DGRAM, icmp)
         else:
             raise PermissionError
     #Fill in end
