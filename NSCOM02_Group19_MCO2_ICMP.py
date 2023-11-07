@@ -43,7 +43,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #Fill in start
 
         #Fetch the ICMP header from the IP packet
-
         #icmp_header =
 
         #Fill in end
@@ -108,7 +107,6 @@ def doOnePing(destAddr, timeout):
     #Fill in end
 
     return delay
-
 
 def ping(host, timeout=1):
     # timeout=1 means: If one second goes by without a reply from the server,
