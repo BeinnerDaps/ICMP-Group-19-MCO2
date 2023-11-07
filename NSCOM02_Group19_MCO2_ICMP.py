@@ -43,6 +43,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #Fill in start
 
         #Fetch the ICMP header from the IP packet
+
         #icmp_header =
 
         #Fill in end
