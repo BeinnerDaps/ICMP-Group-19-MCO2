@@ -31,6 +31,10 @@ def checksum(string):
 
 
 def receiveOnePing(mySocket, ID, timeout, destAddr):
+    def read_icmp_header(raw: bytes) -> dict:
+        icmp_header_keys = ('type', 'code', 'checksum', 'id', 'seq')
+        return dict(zip(icmp_header_keys, struct.unpack("bbHHh", raw)))
+
     timeLeft = timeout
     while 1:
         startedSelect = time.time()
@@ -44,8 +48,17 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 
         #Fetch the ICMP header from the IP packet
 
-        #icmp_header =
+        icmp_hdr_raw = recPacket[20:28]
+        icmp_header = read_icmp_header(icmp_hdr_raw)
 
+        # if icmp_header['type'] == 11: # time exceeded
+        #     if icmp_header['code'] == 0:
+        #         raise errors.TimeToLiveExpired(ip_header=ip_header, icmp_header=icmp_header)
+        if icmp_header['type'] == 3:
+            return "Host Unreachable"
+        if icmp_header['id'] == ID and icmp_header['type'] == 0: #echo reply
+            timeSent = struct.unpack("d", recPacket[28:28 + struct.calcsize("d")])[0]
+            return timeReceived - timeSent
         #Fill in end
 
         timeLeft = timeLeft - howLongInSelect
@@ -74,6 +87,7 @@ def sendOnePing(mySocket, destAddr, ID):
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     packet = header + data
     mySocket.sendto(packet, (destAddr, 1)) # AF_INET address must be tuple, not str
+    # print(packet)
     # Both LISTS and TUPLES consist of a number of objects
     # which can be referenced by their position number within the object.
 
@@ -86,6 +100,7 @@ def doOnePing(destAddr, timeout):
     #create socket
     try:
         mySocket = socket(AF_INET, SOCK_RAW, icmp)
+        # print (mySocket)
     except PermissionError:
         if PermissionError.errno == errno.EPERM:
            mySocket = socket(AF_INET, SOCK_DGRAM, icmp)
