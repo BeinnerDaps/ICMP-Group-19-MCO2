@@ -15,12 +15,12 @@ def checksum(string):
     count = 0
 
     while count < countTo:
-        thisVal = ord(string[count+1]) * 256 + ord(string[count])
+        thisVal = string[count+1] * 256 + string[count]
         csum = csum + thisVal
         csum = csum & 0xffffffff
         count = count + 2
     if countTo < len(string):
-        csum = csum + ord(string[len(string) - 1])
+        csum = csum + string[len(string) - 1]
         csum = csum & 0xffffffff
     csum = (csum >> 16) + (csum & 0xffff)
     csum = csum + (csum >> 16)
@@ -51,9 +51,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         icmp_hdr_raw = recPacket[20:28]
         icmp_header = read_icmp_header(icmp_hdr_raw)
 
-        # if icmp_header['type'] == 11: # time exceeded
-        #     if icmp_header['code'] == 0:
-        #         raise errors.TimeToLiveExpired(ip_header=ip_header, icmp_header=icmp_header)
         if icmp_header['type'] == 3:
             return "Host Unreachable"
         if icmp_header['id'] == ID and icmp_header['type'] == 0: #echo reply
@@ -74,7 +71,7 @@ def sendOnePing(mySocket, destAddr, ID):
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     data = struct.pack("d", time.time())
     # Calculate the checksum on the data and the dummy header.
-    myChecksum = checksum(str(header + data))
+    myChecksum = checksum(header + data)
 
 
     # Get the right checksum, and put in the header
@@ -100,7 +97,7 @@ def doOnePing(destAddr, timeout):
     #create socket
     try:
         mySocket = socket(AF_INET, SOCK_RAW, icmp)
-        # print (mySocket)
+        #print (mySocket)
     except PermissionError:
         if PermissionError.errno == errno.EPERM:
            mySocket = socket(AF_INET, SOCK_DGRAM, icmp)
@@ -135,6 +132,7 @@ def ping(host, timeout=1):
     # Send ping requests to a server separated by approximately one second
     while 1 :
         delay = doOnePing(dest, timeout)
+
         print(delay)
         time.sleep(1)# one second
     return delay
