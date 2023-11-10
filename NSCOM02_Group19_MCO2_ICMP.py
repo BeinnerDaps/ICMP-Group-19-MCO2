@@ -6,6 +6,8 @@ import time
 import select
 import binascii
 import errno
+import statistics
+
 
 ICMP_ECHO_REQUEST = 8
 
@@ -121,18 +123,37 @@ def doOnePing(destAddr, timeout):
 
     return delay
 
-def ping(host, timeout=1):
-    # timeout=1 means: If one second goes by without a reply from the server,
-    # the client assumes that either the client's ping or the server's pong is lost
-
+def ping(host, timeout=1, count=5):  # Introducing a count for number of pings
     dest = gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     print("")
 
-    # Send ping requests to a server separated by approximately one second
-    while 1 :
+    delays = []
+    packets_sent = 0
+    packets_received = 0
+
+    while packets_sent < count:  # Loop for the specified count of pings
         delay = doOnePing(dest, timeout)
 
+        if delay is not None:
+            delays.append(delay)
+            packets_received += 1
+
         print(delay)
-        time.sleep(1)# one second
-    return delay
+        time.sleep(1)  # one second
+        packets_sent += 1
+
+    # Calculate statistics
+    min_rtt = min(delays) if delays else 0
+    max_rtt = max(delays) if delays else 0
+    avg_rtt = statistics.mean(delays) if delays else 0
+
+    packet_loss_rate = ((packets_sent - packets_received) / packets_sent) * 100 if packets_sent > 0 else 0
+    packets_lost = packets_sent - packets_received
+
+    print("\n--- Ping statistics for " + dest + " ---")
+    print(f"\t{packets_sent} Packets: Sent = {packets_received} Received, Lost = {packets_lost} ({packet_loss_rate:.2f}% packet loss)")
+    print(f"Approximate round trip times in milli-seconds:\n\t Minimum = {min_rtt:.6f}ms, Maximum = {max_rtt:.6f}ms, Average = {avg_rtt:.6f}ms")
+
+    return delays, min_rtt, max_rtt, avg_rtt, packet_loss_rate
+
