@@ -141,18 +141,18 @@ def ping(host, timeout=1, count=5):
 
         if delay == -1:
             timeouts += 1
+            print("Request timed out.")
         elif delay == 1:
             network_unreachable += 1
+            print("Network Unreachable")
         elif delay == 2:
             host_unreachable += 1
+            print("Host Unreachable")
         else:
-            delays.append(delay)
+            delays.append(delay * 1000)  # Convert delay to milliseconds
             packets_received += 1
-        
-        if delay == -1:
-            print("Request timed out.")           
-        else:    print(delay)
-        
+            print(f"Reply from {dest}: {delay * 1000:.6f} ms")
+
         time.sleep(1)
         packets_sent += 1
 
@@ -169,4 +169,5 @@ def ping(host, timeout=1, count=5):
     print(f"Approximate round trip times in milli-seconds:\n\t Minimum = {min_rtt:.6f}ms, Maximum = {max_rtt:.6f}ms, Average = {avg_rtt:.6f}ms")
 
     return delays, min_rtt, max_rtt, avg_rtt, packet_loss_rate
+
 
