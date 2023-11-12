@@ -51,7 +51,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #Fetch the ICMP header from the IP packet
         icmp_hdr_raw = recPacket[20:28]
         icmp_header = read_icmp_header(icmp_hdr_raw)
-        print(icmp_header['type'])
         if icmp_header['type'] == 3:
             if icmp_header['code'] == 0:
                 print("Network Unreachable")
