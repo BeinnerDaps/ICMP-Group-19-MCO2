@@ -42,27 +42,29 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         startedSelect = time.time()
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
-        if whatReady[0] == []: # Timeout
-            return "Request timed out."
+        if whatReady[0] == []:  # Timeout
+            return -1
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
         #Fill in start
 
         #Fetch the ICMP header from the IP packet
-
         icmp_hdr_raw = recPacket[20:28]
         icmp_header = read_icmp_header(icmp_hdr_raw)
-
+        print(icmp_header['type'])
         if icmp_header['type'] == 3:
-            return "Host Unreachable"
-        if icmp_header['id'] == ID and icmp_header['type'] == 0: #echo reply
+            if icmp_header['code'] == 0:
+                print("Network Unreachable")
+            elif icmp_header['code'] == 1:
+                print("Host Unreachable")
+
+        if icmp_header['id'] == ID and icmp_header['type'] == 0:  # Echo reply
             timeSent = struct.unpack("d", recPacket[28:28 + struct.calcsize("d")])[0]
             return timeReceived - timeSent
-        #Fill in end
 
         timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
-            return "Request timed out."
+            return -1  # Return -1 for timeout
 
 def sendOnePing(mySocket, destAddr, ID):
     # Header is type (8), code (8), checksum (16), id (16), sequence (16)
@@ -123,7 +125,7 @@ def doOnePing(destAddr, timeout):
 
     return delay
 
-def ping(host, timeout=1, count=5):  # Introducing a count for number of pings
+def ping(host, timeout=1, count=5):
     dest = gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     print("")
@@ -131,16 +133,28 @@ def ping(host, timeout=1, count=5):  # Introducing a count for number of pings
     delays = []
     packets_sent = 0
     packets_received = 0
+    timeouts = 0
+    network_unreachable = 0
+    host_unreachable = 0
 
-    while packets_sent < count:  # Loop for the specified count of pings
+    while packets_sent < count:
         delay = doOnePing(dest, timeout)
 
-        if delay is not None:
+        if delay == -1:
+            timeouts += 1
+        elif delay == 1:
+            network_unreachable += 1
+        elif delay == 2:
+            host_unreachable += 1
+        else:
             delays.append(delay)
             packets_received += 1
-
-        print(delay)
-        time.sleep(1)  # one second
+        
+        if delay == -1:
+            print("Request timed out.")           
+        else:    print(delay)
+        
+        time.sleep(1)
         packets_sent += 1
 
     # Calculate statistics
