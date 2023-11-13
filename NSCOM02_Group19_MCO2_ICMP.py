@@ -1,3 +1,11 @@
+# NSCOM02 ICMP Machine Project
+# S11 Group 19
+# MAGDAMO, BIEN RAFAEL O.
+# PANGILINAN, WILHELM VINCENT S.
+# ICMP program github reference: https://github.com/kyan001/ping3
+
+# To Run: python -c "import NSCOM02_Group19_MCO2_ICMP; NSCOM02_Group19_MCO2_ICMP.ping('8.8.8.8')"
+
 from socket import *
 import os
 import sys
