@@ -4,7 +4,7 @@
 # PANGILINAN, WILHELM VINCENT S.
 # ICMP program github reference: https://github.com/kyan001/ping3
 
-# To Run: python -c "import NSCOM02_Group19_MCO2_ICMP; NSCOM02_Group19_MCO2_ICMP.ping('8.8.8.8')"
+# To Run: python -c "import NSCOM02_Group19_MCO2_ICMP; NSCOM02_Group19_MCO2_ICMP.ping('<target IP address>')"
 
 from socket import *
 import os
